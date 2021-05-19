@@ -73,7 +73,7 @@ echo
 ############
 echo "Running kubeadm init"
 if [[ ! $(docker ps --format '{{.Names}}' | grep k8s_kube-apiserver) ]]; then
-  kubeadm init --pod-network-cidr="192.168.0.0/24"
+  kubeadm init --pod-network-cidr="192.168.0.0/16"
 else
   echo "  kubeadm already initialized"
 fi
