@@ -1,6 +1,6 @@
 # Trilio scehduler replacement
 
-## Setup
+## Setup K8S
 This is intended to run as a single-node k8s cluster on an ubuntu 20.04 VM.
 
 Pull the code then run the following to set it up:
@@ -20,5 +20,21 @@ ip_range="10.106.252.140-10.106.252.165"
 install-metallb.sh $ip_range
 
 # Deploy NGINX ingress controller
+cd ../nginx-ingress
+./install-nginx.ingress.sh
+```
 
+## Deploy the app
+
+```
+# Build the images
+cd ../
+./build-images.sh
+
+# Deploy the app
+cd ../helm
+helm install -f btsr.yaml btsr ./btsr
+
+# Show it
+helm list
 ```

@@ -1,0 +1,16 @@
+# Chart.yaml
+apiVersion: v2
+name: btsr
+description: Replacement for Trilio's scheduler using Breqwatr's rules
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+keywords:
+  - Trilio
+  - Breqwatr
+  - Backups
+  - Scheduler
+home: https://github.com/breqwatr/breqwatr-trilio-scheduler-replacement
+maintainers:
+  - name: Kyle Pericak
+    url: https://github.com/kylep

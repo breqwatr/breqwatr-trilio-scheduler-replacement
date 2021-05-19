@@ -1,0 +1,5 @@
+btsr:
+  config:
+    data:
+      - key: sample
+        value: value

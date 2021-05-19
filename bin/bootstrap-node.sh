@@ -73,7 +73,7 @@ echo
 ############
 echo "Running kubeadm init"
 if [[ ! $(docker ps --format '{{.Names}}' | grep k8s_kube-apiserver) ]]; then
-  kubeadm init --pod-network-cidr="192.168.0.0/16"
+  kubeadm init --pod-network-cidr="192.168.0.0/16" --service-cidr "10.218.0.0/16"
 else
   echo "  kubeadm already initialized"
 fi
@@ -93,6 +93,18 @@ else
 fi
 echo
 
+########
+# helm #
+########
+echo "installing helm"
+if [[ "$(which helm)" == "" ]]; then
+  snap install helm --classic
+else
+  echo "  helm was already installed"
+fi
+echo
+
 
 # Verify
+sleep 30
 kubectl cluster-info

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: btsr-config
+data:
+  OS_PROJECT_DOMAIN_NAME: Default
+  OS_USER_DOMAIN_NAME: Default
+  OS_PROJECT_NAME: {{ required "OS_PROJECT_NAME required" .Values.OS_PROJECT_NAME }}
+  OS_TENANT_NAME: {{ required "OS_PROJECT_NAME required" .Values.OS_PROJECT_NAME }}
+  OS_USERNAME: {{ required "OS_USERNAME required" .Values.OS_USERNAME }}
+  OS_PASSWORD: {{ required "OS_PASSWORD required" .Values.OS_PASSWORD }}
+  OS_AUTH_URL: {{ required "OS_AUTH_URL required" .Values.OS_AUTH_URL }}
+  OS_INTERFACE: public
+  OS_ENDPOINT_TYPE: publicUrl
+  OS_IDENTITY_API_VERSION: "3"
+  OS_REGION_NAME: RegionOne
+  OS_AUTH_PLUGIN: password

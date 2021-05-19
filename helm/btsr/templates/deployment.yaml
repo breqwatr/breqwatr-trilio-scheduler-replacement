@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bts-worker
+  name: bts-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bts-worker
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: bts-worker
+    spec:
+      volumes:
+        - name: btsr-vol
+          hostPath:
+            path: /btsr
+            type: Directory
+      containers:
+        - image: breqwatr/btsr-worker
+          imagePullPolicy: Never
+          name: btsr-worker
+          resources: {}
+          volumeMounts:
+            - mountPath: /btsr
+              name: btsr-vol
+          envFrom:
+            - configMapRef:
+                name: OS_PROJECT_DOMAIN_NAME
+            - configMapRef:
+                name: OS_USER_DOMAIN_NAME
+            - configMapRef:
+                name: OS_PROJECT_NAME
+            - configMapRef:
+                name: OS_TENANT_NAME
+            - configMapRef: OS_USERNAME
+                name: OS_PASSWORD
+            - configMapRef:
+                name: OS_AUTH_URL
+            - configMapRef:
+                name: OS_INTERFACE
+            - configMapRef:
+                name: OS_ENDPOINT_TYPE
+            - configMapRef:
+                name: OS_IDENTITY_API_VERSION
+            - configMapRef:
+                name: OS_REGION_NAME
+            - configMapRef:
+                name: OS_AUTH_PLUGIN
