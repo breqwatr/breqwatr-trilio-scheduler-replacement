@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2021-05-19T01:37:46Z"
+  labels:
+    app: nginx-test
+  name: nginx-test
+  namespace: default
+  resourceVersion: "97660"
+  uid: e6708878-ebbe-41c0-9f29-7521b6c7603a
+spec:
+  clusterIP: 10.101.110.239
+  clusterIPs:
+  - 10.101.110.239
+  externalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: nginx-test-30080
+    nodePort: 30080
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx-test
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
