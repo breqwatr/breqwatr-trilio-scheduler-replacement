@@ -73,7 +73,7 @@ echo
 ############
 echo "Running kubeadm init"
 if [[ ! $(docker ps --format '{{.Names}}' | grep k8s_kube-apiserver) ]]; then
-  kubeadm init
+  kubeadm init --pod-network-cidr="192.168.0.0/24"
 else
   echo "  kubeadm already initialized"
 fi
@@ -86,6 +86,7 @@ echo "configuring $HOME/.bashrc"
 if [[ "$(cat $HOME/.bashrc | grep 'KUBECONFIG')" == "" ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
   echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> $HOME/.bashrc
+  echo 'export KUBECONFIG=/etc/kubernetes/admin.conf'
   echo "Done configuring $HOME/.bashrc"
 else
   echo "  $HOME/.bashrc already configured"
