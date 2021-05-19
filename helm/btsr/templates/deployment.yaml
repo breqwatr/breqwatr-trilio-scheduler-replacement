@@ -31,24 +31,4 @@ spec:
               name: btsr-vol
           envFrom:
             - configMapRef:
-                name: OS_PROJECT_DOMAIN_NAME
-            - configMapRef:
-                name: OS_USER_DOMAIN_NAME
-            - configMapRef:
-                name: OS_PROJECT_NAME
-            - configMapRef:
-                name: OS_TENANT_NAME
-            - configMapRef: OS_USERNAME
-                name: OS_PASSWORD
-            - configMapRef:
-                name: OS_AUTH_URL
-            - configMapRef:
-                name: OS_INTERFACE
-            - configMapRef:
-                name: OS_ENDPOINT_TYPE
-            - configMapRef:
-                name: OS_IDENTITY_API_VERSION
-            - configMapRef:
-                name: OS_REGION_NAME
-            - configMapRef:
-                name: OS_AUTH_PLUGIN
+                name: btsr-config
