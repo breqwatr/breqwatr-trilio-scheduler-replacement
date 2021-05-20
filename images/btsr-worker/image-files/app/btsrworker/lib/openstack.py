@@ -69,7 +69,7 @@ def get_servers(token, token_data):
     nova_url = os_endpoint("nova", token_data)
     servers_url = f"{nova_url}/servers"
     headers = os_headers(token)
-    resp = requests.get(servers_url, headers=headers)
+    resp = requests.get(servers_url, headers=headers, verify=False)
     if resp.status_code != 200:
         raise OpenstackException(f"{resp.status_code}: {resp.reason}")
     return resp.json()["servers"]

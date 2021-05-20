@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: btsr-openrc
+data:
+  openrc: {{ required "list of openrc files required" .Values.configNam }}
+    - project: admin
+      filename: admin-openrc.sh

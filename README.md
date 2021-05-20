@@ -30,7 +30,14 @@ cd ../nginx-ingress
 # Build the images
 cd ../
 ./build-images.sh
+```
 
+Create a `btsr-helm.yaml` to identify your openrc files:
+```yaml
+# btsr-helm.yaml
+... somehow specify the openrc file(e) to use
+
+```
 # Deploy the app
 cd ../helm
 helm install -f btsr.yaml btsr ./btsr

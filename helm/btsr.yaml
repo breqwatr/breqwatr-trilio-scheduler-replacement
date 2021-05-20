@@ -1,4 +1,7 @@
 btsr:
+  openrc:
+    - project: breqwatr
+      filename: kyle-openrc.sh
   config:
     data:
       - key: sample

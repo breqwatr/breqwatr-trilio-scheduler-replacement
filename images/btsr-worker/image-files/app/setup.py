@@ -10,7 +10,11 @@ setup(
     author="Kyle Pericak",
     author_email="kyle.pericak@breqwatr.com",
     python_requires='>=3.0.0',
-    install_requires=["redis"],
+    install_requires=[
+      "redis",
+      "gunicorn",
+      "Flask"
+    ],
     entry_points="""
         [console_scripts]
         btsr-worker=btsrworker.main:main

@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+
 #################
 # sanity checks #
 #################
@@ -13,6 +14,7 @@ if [[ "$(whoami)" != "root" ]]; then
   echo "ERROR: be root" >&2
   exit 1
 fi
+
 
 ##########
 # Docker #
@@ -50,6 +52,7 @@ else
 fi
 echo
 
+
 #####################################
 # Install kubeadm, kubelet, kubectl #
 #####################################
@@ -68,16 +71,18 @@ else
 fi
 echo
 
+
 ############
 # init k8s #
 ############
 echo "Running kubeadm init"
 if [[ ! $(docker ps --format '{{.Names}}' | grep k8s_kube-apiserver) ]]; then
-  kubeadm init --pod-network-cidr="192.168.0.0/16" --service-cidr "10.218.0.0/16"
+  kubeadm init --pod-network-cidr="192.168.0.0/24" --service-cidr "192.168.1.0/24"
 else
   echo "  kubeadm already initialized"
 fi
 echo
+
 
 ############
 # env conf #
@@ -92,6 +97,7 @@ else
   echo "  $HOME/.bashrc already configured"
 fi
 echo
+
 
 ########
 # helm #

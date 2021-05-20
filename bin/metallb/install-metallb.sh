@@ -16,7 +16,7 @@ ip_range=$1
 kubectl get configmap  -n kube-system  kube-proxy -o yaml > kube-proxy-configmap.yaml
 sed -i 's/strictARP: false/strictARP: true/g' kube-proxy-configmap.yaml
 kubectl apply -f kube-proxy-configmap.yaml
-rm -F kube-proxy-configmap.yaml
+rm -f kube-proxy-configmap.yaml
 
 # Install metalLB
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.5/manifests/namespace.yaml
