@@ -1,17 +1,26 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: btsr-config
+  name: btsr-config-schedule
 data:
-  OS_PROJECT_DOMAIN_NAME: Default
-  OS_USER_DOMAIN_NAME: Default
-  OS_PROJECT_NAME: {{ required "OS_PROJECT_NAME required" .Values.OS_PROJECT_NAME }}
-  OS_TENANT_NAME: {{ required "OS_PROJECT_NAME required" .Values.OS_PROJECT_NAME }}
-  OS_USERNAME: {{ required "OS_USERNAME required" .Values.OS_USERNAME }}
-  OS_PASSWORD: {{ required "OS_PASSWORD required" .Values.OS_PASSWORD }}
-  OS_AUTH_URL: {{ required "OS_AUTH_URL required" .Values.OS_AUTH_URL }}
-  OS_INTERFACE: public
-  OS_ENDPOINT_TYPE: publicUrl
-  OS_IDENTITY_API_VERSION: "3"
-  OS_REGION_NAME: RegionOne
-  OS_AUTH_PLUGIN: password
+  concurrent_fulls_cloud: 1
+  concurrent_fulls_host: 1
+  concurrent_total_cloud: 1
+  concurrent_total_host: 1
+  nfs_speed_bytes_per_second: 375809638400  # 350G (1024 * 1024 * 1024 * 350)
+  volume_create_time_seconds: 60
+  workload_time_seconds: 60
+  fudge_factor: 1
+  interval: 7
+  full_interval: 7
+  retention_days: 7
+  allow_weekdays: yes
+  allow_weekends: yes
+  allow_all_day_weekdays: no
+  allow_all_day_weekends: yes
+  weekday_blacklist_start_time: "08:00"
+  weekday_blacklist_end_time: "18:00"
+  weekend_blacklist_start_time: "08:00"
+  weekend_blacklist_end_time: "18:00"
+
+
