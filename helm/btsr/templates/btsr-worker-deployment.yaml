@@ -31,4 +31,11 @@ spec:
               name: btsr-vol
           envFrom:
             - configMapRef:
-                name: btsr-config
+                name: btsr-schedule
+								items:
+								- key: tuning
+									path: tuning.conf
+								- key: backups
+									path: backups.conf
+								- key: scheduling
+									path: scheduling.conf
