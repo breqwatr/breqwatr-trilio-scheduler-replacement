@@ -4,19 +4,33 @@ from btsrlib.common import env
 
 
 class OpenstackException(Exception):
-    """ Something has gone wrong with a call to OpenStack """
+    """Something has gone wrong with a call to OpenStack"""
+
 
 def get_os_env():
-    """ Return the OpenStack environment values in a dictionary """
-    keys = ["OS_PROJECT_DOMAIN_NAME", "OS_USER_DOMAIN_NAME", "OS_PROJECT_NAME", "OS_TENANT_NAME", "OS_USERNAME", "OS_PASSWORD", "OS_AUTH_URL", "OS_INTERFACE", "OS_ENDPOINT_TYPE", "OS_IDENTITY_API_VERSION", "OS_REGION_NAME", "OS_AUTH_PLUGIN"]
+    """Return the OpenStack environment values in a dictionary"""
+    keys = [
+        "OS_PROJECT_DOMAIN_NAME",
+        "OS_USER_DOMAIN_NAME",
+        "OS_PROJECT_NAME",
+        "OS_TENANT_NAME",
+        "OS_USERNAME",
+        "OS_PASSWORD",
+        "OS_AUTH_URL",
+        "OS_INTERFACE",
+        "OS_ENDPOINT_TYPE",
+        "OS_IDENTITY_API_VERSION",
+        "OS_REGION_NAME",
+        "OS_AUTH_PLUGIN",
+    ]
     os_env = {}
     for key in keys:
-      os_env[key] = env(key)
+        os_env[key] = env(key)
     return os_env
 
 
 def get_token(os_env):
-    """ Get an OpenStack token and API catalog using global vars """
+    """Get an OpenStack token and API catalog using global vars"""
     # Build json data to send to openstack api
     os_username = os_env["OS_USERNAME"]
     os_password = os_env["OS_PASSWORD"]
@@ -53,19 +67,19 @@ def get_token(os_env):
 
 
 def os_headers(token):
-    """ Return the format expected by openstack/trilio for HTPP headers """
+    """Return the format expected by openstack/trilio for HTPP headers"""
     return {"Content-Type": "application/json", "X-Auth-Token": token}
 
 
 def os_endpoint(name, token_data):
-    """ Return the OpenStack endpoint from the token's JSON data """
+    """Return the OpenStack endpoint from the token's JSON data"""
     os_interface = get_os_env()["OS_INTERFACE"]
     catalog = next(c for c in token_data["token"]["catalog"] if c["name"] == name)
     return next(e["url"] for e in catalog["endpoints"] if e["interface"] == os_interface)
 
 
 def get_servers(token, token_data):
-    """ Return a list of servers in the scoped project """
+    """Return a list of servers in the scoped project"""
     nova_url = os_endpoint("nova", token_data)
     servers_url = f"{nova_url}/servers"
     headers = os_headers(token)
@@ -74,8 +88,9 @@ def get_servers(token, token_data):
         raise OpenstackException(f"{resp.status_code}: {resp.reason}")
     return resp.json()["servers"]
 
+
 def get_servers_details(token, token_data, servers):
-    """ given a list of servers with "id" properties, return a dict with full data """
+    """given a list of servers with "id" properties, return a dict with full data"""
     nova_url = os_endpoint("nova", token_data)
     headers = os_headers(token)
     details = {}
@@ -87,7 +102,3 @@ def get_servers_details(token, token_data, servers):
             raise OpenstackException(f"{resp.status_code}: {resp.reason}")
         details[server_id] = resp.json()["server"]
     return details
-
-
-
-

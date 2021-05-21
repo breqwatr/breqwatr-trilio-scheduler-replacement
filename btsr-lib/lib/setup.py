@@ -9,12 +9,8 @@ setup(
     description="Breqwatr Trilio Replacement Scheduler Lib",
     author="Kyle Pericak",
     author_email="kyle.pericak@breqwatr.com",
-    python_requires='>=3.0.0',
-    install_requires=[
-      "redis",
-      "python-openstackclient",
-      "storops"
-    ],
+    python_requires=">=3.0.0",
+    install_requires=["redis", "python-openstackclient", "storops"],
     entry_points="""
         [console_scripts]
         btsr-lib=btsrlib.main:main
@@ -22,5 +18,5 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Natural Language :: English",
-    ]
+    ],
 )

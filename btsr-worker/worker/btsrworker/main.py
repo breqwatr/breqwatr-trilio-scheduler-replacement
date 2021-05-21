@@ -4,6 +4,7 @@ import btsrlib.trilio as trilio
 import btsrlib.config as config
 import btsrlib.redis as redis
 
+
 def main():
     print("BTSR WORKER")
     openrc_files = config.get_openrc_files()
@@ -21,6 +22,7 @@ def main():
         print("done")
         data = redis.get_dict(client, project)
         from pprint import pprint
+
         pprint(data)
     # workloads = trilio.get_workloads(token, token_data)
     # workload = trilio.get_workload(token, token_data, workloads[0]['id'])
