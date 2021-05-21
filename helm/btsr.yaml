@@ -1,8 +1,3 @@
-btsr:
-  openrc:
-    - project: breqwatr
-      filename: kyle-openrc.sh
-  config:
-    data:
-      - key: sample
-        value: value
+openrc:
+  - project: kyle
+    filename: kyle-openrc.sh

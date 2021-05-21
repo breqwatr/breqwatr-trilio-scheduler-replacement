@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: btsr-api
+  name: btsr-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: btsr-api
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: btsr-api
+    spec:
+      volumes:
+        - name: openrc-exports
+          hostPath:
+            path: /btsr/openrc
+            type: Directory
+        - name: openrc-conf
+          configMap:
+            name: btsr-conffiles
+            items:
+            - key: "openrcPaths.conf"
+              path: "openrcPaths.conf"
+      containers:
+        - image: breqwatr/btsr-api
+          # imagePullPolicy: Never
+          name: btsr-api
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /btsr/openrc
+              name: openrc-exports
+            - mountPath: /config
+              name: openrc-conf

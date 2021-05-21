@@ -1,4 +1,1 @@
-OS_PROJECT_NAME: sample
-OS_USERNAME: sample
-OS_PASSWORD: sample
-OS_AUTH_URL: sample
+openrc: {{ required "openrc data is required" .Values.openrc }}
