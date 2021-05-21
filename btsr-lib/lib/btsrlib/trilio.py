@@ -29,18 +29,29 @@ def get_workload(token, token_data, workload_id):
 
 def is_backup_enabled(server):
     """Return if backups are enabled or not in a server"""
-    if (
+    return (
         "metadata" in server
         and "enable-backups" in server["metadata"]
-        and server["enable-backups"]["enable-backups"]
-    ):
-        return True
-    return False
+        and (
+            server["metadata"]["enable-backups"].lower() == "yes"
+            or server["metadata"]["enable-backups"].lower() == "true"
+        )
+    )
 
 
-def get_trilio_servers_details(server_details):
+def get_trilio_summary(server_details):
     """Given a dict of server details, remove extrenuous data and add trilio data"""
     data = {}
     for server_id in server_details:
-        data[server_id] = {"name": "", "created": "", "backups_enabled": ""}
+        server = server_details[server_id]
+        data[server_id] = {
+            "name": server["name"],
+            "created": server["created"],
+            "backups_enabled": str(is_backup_enabled(server)),
+            "workload_exists": "False",
+            "last_backup": "never",
+            "last_backup_duration": "-",
+            "last_backup_size": "-",
+            "last_backup_error": "-",
+        }
     return data

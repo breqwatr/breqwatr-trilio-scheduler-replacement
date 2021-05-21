@@ -10,7 +10,7 @@ setup(
     author="Kyle Pericak",
     author_email="kyle.pericak@breqwatr.com",
     python_requires=">=3.0.0",
-    install_requires=[],
+    install_requires=["click"],
     entry_points="""
         [console_scripts]
         btsr-worker=btsrworker.main:main
