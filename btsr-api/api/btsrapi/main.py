@@ -1,4 +1,4 @@
-""" trilio backups report """
+""" btsr api entrypoint """
 from flask import Flask
 
 app = Flask(__name__)

@@ -1,17 +1,16 @@
-"""Set up btsrworker"""
+"""Set up btsrapi"""
 from setuptools import setup, find_packages
 
 setup(
-    name="btsrworker",
+    name="btsrapi",
     packages=find_packages(),
     version="1.0",
     license="",
-    description="Breqwatr Trilio Replacement Scheduler Worker",
+    description="Breqwatr Trilio Replacement Scheduler API",
     author="Kyle Pericak",
     author_email="kyle.pericak@breqwatr.com",
     python_requires='>=3.0.0',
     install_requires=[
-      "redis",
       "gunicorn",
       "Flask"
     ],

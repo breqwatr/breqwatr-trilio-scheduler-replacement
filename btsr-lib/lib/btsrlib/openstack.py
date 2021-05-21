@@ -1,6 +1,6 @@
 """ OpenStack functions """
 import requests
-from btsrworker.lib.common import env
+from btsrlib.common import env
 
 
 class OpenstackException(Exception):

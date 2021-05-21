@@ -1,6 +1,6 @@
 """ Trilio functions """
 import requests
-import btsrworker.lib.openstack as os
+import btsrlib.openstack as os
 
 ENDPOINT = "TrilioVaultWLM"
 

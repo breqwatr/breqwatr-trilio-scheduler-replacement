@@ -1,6 +1,6 @@
 """ Entrypoint for btsr-worker """
-import btsrworker.lib.openstack as os
-import btsrworker.lib.trilio as trilio
+import btsrlib.openstack as os
+import btsrlib.trilio as trilio
 
 def main():
     env = os.get_os_env()
