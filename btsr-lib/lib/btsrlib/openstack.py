@@ -74,3 +74,20 @@ def get_servers(token, token_data):
         raise OpenstackException(f"{resp.status_code}: {resp.reason}")
     return resp.json()["servers"]
 
+def get_servers_details(token, token_data, servers):
+    """ given a list of servers with "id" properties, return a dict with full data """
+    nova_url = os_endpoint("nova", token_data)
+    headers = os_headers(token)
+    details = {}
+    for server in servers:
+        server_id = server["id"]
+        server_url = f"{nova_url}/servers/{server_id}"
+        resp = requests.get(server_url, headers=headers, verify=False)
+        if resp.status_code != 200:
+            raise OpenstackException(f"{resp.status_code}: {resp.reason}")
+        details[server_id] = resp.json()["server"]
+    return details
+
+
+
+

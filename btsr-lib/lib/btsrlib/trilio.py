@@ -25,3 +25,21 @@ def get_workload(token, token_data, workload_id):
         raise os.OpenStackException(f"{resp.status_code}: {resp.reason}")
     return workload_resp.json()["workload"]
 
+
+def is_backup_enabled(server):
+    """ Return if backups are enabled or not in a server """
+    if ( "metadata" in server and "enable-backups" in server["metadata"] and server["enable-backups"]["enable-backups"] ):
+        return True
+    return False
+
+
+def get_trilio_servers_details(server_details):
+    """ Given a dict of server details, remove extrenuous data and add trilio data """
+    data = {}
+    for server_id in server_details:
+        data[server_id] = {
+            "name": "",
+            "created": "",
+            "backups_enabled": ""
+        }
+    return data
