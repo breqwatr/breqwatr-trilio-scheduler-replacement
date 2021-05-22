@@ -1,0 +1,31 @@
+<h1>hi</h1>
+
+<table>
+<tr>
+  <th>ID</th>
+  <th>Name</th>
+  <th>Created</th>
+  <th>Backups Enabled</th>
+  <th>Workload Exists</th>
+  <th>Last Backup</th>
+  <th>Duration<th>
+  <th>Size</th>
+  <th>Error</th>
+</tr>
+
+{% for server_id in servers -%}
+{% set server = servers[server_id] %}
+<tr>
+  <td> {{ server.id }} </td>
+  <td> {{ server.name}} </td>
+  <td> {{ server.created }} </td>
+  <td> {{ server.backups_enabled }} </td>
+  <td> {{ server.workload_exists }} </td>
+  <td> {{ server.last_backup }} </td>
+  <td> {{ server.last_backup_duration }} </td>
+  <td> {{ server.last_backup_size }} </td>
+  <td> {{ server.last_backup_error }} </td>
+</tr>
+{%- endfor %}
+</table>
+

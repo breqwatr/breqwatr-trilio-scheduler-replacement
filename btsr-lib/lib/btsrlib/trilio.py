@@ -45,6 +45,7 @@ def get_trilio_summary(server_details):
     for server_id in server_details:
         server = server_details[server_id]
         data[server_id] = {
+            "id": server_id,
             "name": server["name"],
             "created": server["created"],
             "backups_enabled": str(is_backup_enabled(server)),

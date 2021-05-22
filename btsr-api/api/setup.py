@@ -11,10 +11,7 @@ setup(
     author_email="kyle.pericak@breqwatr.com",
     python_requires=">=3.0.0",
     install_requires=["gunicorn", "Flask"],
-    entry_points="""
-        [console_scripts]
-        btsr-worker=btsrworker.main:main
-    """,
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
         "Natural Language :: English",
