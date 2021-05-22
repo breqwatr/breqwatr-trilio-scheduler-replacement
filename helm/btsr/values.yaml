@@ -1,1 +1,1 @@
-openrc: {{ required "openrc data is required" .Values.openrc }}
+# openrc: {{ required "openrc data is required" .Values.openrc }}
