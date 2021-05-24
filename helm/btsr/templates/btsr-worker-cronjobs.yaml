@@ -1,0 +1,144 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: btsr-worker-update-reports
+spec:
+  # every 1 minute
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      parallelism: 1
+      activeDeadlineSeconds: 50
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: openrc-file
+              hostPath:
+                path: {{ required "openrc_file_path is required" .Values.openrc_file_path }}
+            - name: logs-dir
+              hostPath:
+                path: {{ required "logs_dir is required" .Values.logs_dir }}
+                type: Directory
+          containers:
+          - name: btsr-worker-test
+            image: breqwatr/btsr-worker
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /btsr/openrc.sh
+                name: openrc-file
+              - mountPath: /var/log/btsr
+                name: logs-dir
+            command: ["/bin/bash","-c"]
+            args: ["source /btsr/openrc.sh && btsr-worker update-reports"]
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: btsr-worker-make-workloads
+spec:
+  # every hour
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      parallelism: 1
+      activeDeadlineSeconds: 3300
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: openrc-file
+              hostPath:
+                path: {{ required "openrc_file_path is required" .Values.openrc_file_path }}
+            - name: logs-dir
+              hostPath:
+                path: {{ required "logs_dir is required" .Values.logs_dir }}
+                type: Directory
+          containers:
+          - name: btsr-worker-test
+            image: breqwatr/btsr-worker
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /btsr/openrc.sh
+                name: openrc-file
+              - mountPath: /var/log/btsr
+                name: logs-dir
+            command: ["/bin/bash","-c"]
+            args: ["source /btsr/openrc.sh && btsr-worker create-missing-workloads"]
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: btsr-worker-cleanup
+spec:
+  # every day at 1 am
+  schedule: "0 1 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      parallelism: 1
+      activeDeadlineSeconds: 3600
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: openrc-file
+              hostPath:
+                path: {{ required "openrc_file_path is required" .Values.openrc_file_path }}
+            - name: logs-dir
+              hostPath:
+                path: {{ required "logs_dir is required" .Values.logs_dir }}
+                type: Directory
+          containers:
+          - name: btsr-worker-test
+            image: breqwatr/btsr-worker
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /btsr/openrc.sh
+                name: openrc-file
+              - mountPath: /var/log/btsr
+                name: logs-dir
+            command: ["/bin/bash","-c"]
+            args: ["source /btsr/openrc.sh && btsr-worker delete-old-snapshots"]
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: btsr-worker-exec-backups
+spec:
+  # every 5 min
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: openrc-file
+              hostPath:
+                path: {{ required "openrc_file_path is required" .Values.openrc_file_path }}
+            - name: logs-dir
+              hostPath:
+                path: {{ required "logs_dir is required" .Values.logs_dir }}
+                type: Directory
+          containers:
+          - name: btsr-worker-test
+            image: breqwatr/btsr-worker
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /btsr/openrc.sh
+                name: openrc-file
+              - mountPath: /var/log/btsr
+                name: logs-dir
+            command: ["/bin/bash","-c"]
+            args: ["source /btsr/openrc.sh && btsr-worker start-snapshots"]

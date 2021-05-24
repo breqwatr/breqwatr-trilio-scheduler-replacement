@@ -1,1 +1,3 @@
-# openrc: {{ required "openrc data is required" .Values.openrc }}
+# openrc_file_path: REQUIRED
+# logs_dir: REQUIRED
+# ingress_ip: REQUIRED

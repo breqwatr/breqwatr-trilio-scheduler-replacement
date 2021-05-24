@@ -29,10 +29,10 @@ cd ../nginx-ingress
 ### OpenStack & Trilio auth config
 
 Make a directory to store the auth file(s). You could also use a PV but for simplicity
-a local hostVol is used from /btsr/openrc/.
+a local hostVol is used from /btsr/openrc/. Also make a logs dir.
 
 ```bash
-mkdir -p /btsr/openrc/
+mkdir -p /btsr/openrc/ /var/log/btsr
 ```
 
 Create at least one openrc file to authenticate to your openstack project
@@ -66,7 +66,7 @@ Create a helm config file to identify your openrc files:
 
 ### Deploy the app using Helm
 cd ../helm
-helm install -f btsr-helm.yaml btsr ./btsr
+helm install -f btsr.yaml btsr ./btsr
 
 # Show it
 helm list

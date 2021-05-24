@@ -2,19 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: bts-worker
-  name: bts-worker
+    app: btsr-redis
+  name: btsr-redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bts-worker
+      app: btsr-redis
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: bts-worker
+        app: btsr-redis
     spec:
       containers:
       - name: redis

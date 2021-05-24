@@ -17,24 +17,15 @@ spec:
         app: btsr-api
     spec:
       volumes:
-        - name: openrc-exports
+        - name: openrc-file
           hostPath:
-            path: /btsr/openrc
-            type: Directory
-        - name: openrc-conf
-          configMap:
-            name: btsr-conffiles
-            items:
-            - key: "openrcPaths.conf"
-              path: "openrcPaths.conf"
+            path: {{ required "openrc_file_path is required" .Values.openrc_file_path }}
       containers:
         - image: breqwatr/btsr-api
-          # imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent  # or "Never" if building locally
           name: btsr-api
           ports:
             - containerPort: 80
           volumeMounts:
-            - mountPath: /btsr/openrc
-              name: openrc-exports
-            - mountPath: /config
-              name: openrc-conf
+            - mountPath: /btsr/openrc.sh
+              name: openrc-file
