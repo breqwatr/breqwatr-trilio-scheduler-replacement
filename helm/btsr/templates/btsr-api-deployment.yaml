@@ -20,6 +20,10 @@ spec:
         - name: openrc-file
           hostPath:
             path: {{ required "openrc_file_path is required" .Values.openrc_file_path }}
+        - name: logs-dir
+          hostPath:
+            path: {{ required "logs_dir is required" .Values.logs_dir }}
+            type: Directory
       containers:
         - image: breqwatr/btsr-api
           imagePullPolicy: IfNotPresent  # or "Never" if building locally
@@ -29,3 +33,5 @@ spec:
           volumeMounts:
             - mountPath: /btsr/openrc.sh
               name: openrc-file
+            - mountPath: /var/log/btsr
+              name: logs-dir

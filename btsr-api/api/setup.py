@@ -10,6 +10,7 @@ setup(
     author="Kyle Pericak",
     author_email="kyle.pericak@breqwatr.com",
     python_requires=">=3.0.0",
+    zip_safe=False,
     install_requires=["gunicorn", "Flask"],
     include_package_data=True,
     classifiers=[

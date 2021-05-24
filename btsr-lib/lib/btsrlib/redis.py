@@ -18,7 +18,8 @@ def set_dict(client, key, data):
 
 def get_dict(client, key):
     """Read a dict from redis"""
-    return json.loads(client.get(key))
+    data = client.get(key)
+    return json.loads(data) if data else {}
 
 
 def set_str(client, key, data):
