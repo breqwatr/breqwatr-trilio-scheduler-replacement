@@ -1,2 +1,19 @@
 <a href="/report"> BACK </a><hr />
 <h1>Backup Report: Running Backups</h1>
+
+<table border="1px solid black">
+<tr>
+  <th>worklad id</th>
+  <th>workload name</th>
+  <th>snap duration</th>
+</tr>
+
+{% foreach workload in workloads  %}
+<tr>
+  <td>{{ workload.id }}</td>
+  <td>{{ workload.name }}</td>
+  <td>{{ workload.snap_duration }}
+</tr>
+{% endfor %}
+
+</table>

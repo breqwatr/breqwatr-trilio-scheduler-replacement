@@ -1,2 +1,19 @@
 <a href="/report"> BACK </a><hr />
 <h1>Backup Report: Orphaned Backups</h1>
+
+<table border="1px solid black">
+  <tr>
+    <th>workload id</th>
+    <th># Snaps</th>
+    <th>last snap</th>
+    <th>server names</th>
+  </tr>
+{% foreach workload in workloads %}
+  <tr>
+    <td>{{ workload.id }}</td>
+    <td>{{ workload.num_snaps }}</td>
+    <td>{{ workload.last_snap }}</td>
+    <td>{{ workload.server_names }}</td>
+  </tr>
+{% endfor %}
+</table>
