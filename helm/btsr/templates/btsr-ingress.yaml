@@ -19,7 +19,3 @@ spec:
             name: btsr-api
             port:
               number: 80
-status:
-  loadBalancer:
-    ingress:
-    - ip: {{ required "ingress_ip is required" .Values.ingress_ip }}
