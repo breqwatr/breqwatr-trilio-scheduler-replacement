@@ -17,6 +17,14 @@ spec:
         app: btsr-api
     spec:
       volumes:
+        - name: api
+          hostPath:
+            path: /home/ubuntu/breqwatr-trilio-scheduler-replacement/btsr-api/api
+            type: Directory
+        - name: lib
+          hostPath:
+            path: /home/ubuntu/breqwatr-trilio-scheduler-replacement/btsr-lib/lib
+            type: Directory
         - name: openrc-file
           hostPath:
             path: {{ required "openrc_file_path is required" .Values.openrc_file_path }}
@@ -31,6 +39,10 @@ spec:
           ports:
             - containerPort: 80
           volumeMounts:
+            - mountPath: /btsr/api
+              name: api
+            - mountPath: /btsr/lib
+              name: lib
             - mountPath: /btsr/openrc.sh
               name: openrc-file
             - mountPath: /var/log/btsr
