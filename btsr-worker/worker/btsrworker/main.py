@@ -10,10 +10,9 @@ import btsrlib.config as config
 import btsrlib.redis as redis
 
 
-
 @click.command(name="update-reports")
 def update_reports():
-    """ Save to redis a list of all the servers and their backup-related details """
+    """Save to redis a list of all the servers and their backup-related details"""
     # get the list of servers for its report
     logging.debug("Updating servers_summary report")
     config.source_openrc_file()
@@ -48,7 +47,7 @@ def update_reports():
 
 @click.command(name="print-reports-data")
 def print_reports_data():
-    """ Troubleshooting command to show the data about servers from redis """
+    """Troubleshooting command to show the data about servers from redis"""
     logging.debug("printing reports data")
     client = redis.get_client()
     data = redis.get_dict(client, "servers_summary")
@@ -57,7 +56,7 @@ def print_reports_data():
 
 @click.command(name="create-missing-workloads")
 def create_missing_workloads():
-    """ Find any servers with enable-backups=true and create workloads for them. """
+    """Find any servers with enable-backups=true and create workloads for them."""
     logging.info("creating missing workloads")
     client = redis.get_client()
     server_summary = redis.get_dict(client, "servers_summary")
@@ -67,6 +66,8 @@ def create_missing_workloads():
     for server_id, server in server_summary.items():
         if server["workload_exists"].lower() != "false":
             continue
+        if server["backups_enabled"].lower() == "false":
+            continue
         logging.info(f"creating workload for server id: {server_id}")
         trilio.create_workload(token, token_data, server_id)
     redis.set_last_updated(client)
@@ -74,7 +75,7 @@ def create_missing_workloads():
 
 @click.command(name="delete-old-snapshots")
 def delete_old_snapshots():
-    """ Find any workloads with 2 'available' snapshots and delete the older one """
+    """Find any workloads with 2 'available' snapshots and delete the older one"""
     logging.info("deleting old snapshots")
     client = redis.get_client()
     redis.set_last_updated(client)
@@ -82,7 +83,7 @@ def delete_old_snapshots():
 
 @click.command(name="start-snapshots")
 def start_snapshots():
-    """ start snapshots if any are due to start """
+    """start snapshots if any are due to start"""
     logging.info("starting snapshots")
     # Get the list of workloads
     client = redis.get_client()
@@ -101,19 +102,37 @@ def start_snapshots():
 
 @click.command(name="delete-old-snapshots")
 def delete_old_snashots():
-    """ Delete any old snapshots if a newer full exists """
-    # Check if any workloads have more than one snapshot in 'available' state
-    # Delete the older snapshots until there's only one in each
-
-
+    """Delete any old snapshots if a newer full exists"""
+    logging.info("creating missing workloads")
+    client = redis.get_client()
+    server_summary = redis.get_dict(client, "servers_summary")
+    config.source_openrc_file()
+    env = os.get_os_env()
+    token, token_data = os.get_token(env)
+    snaps = trilio.get_snapshots(token, token_data)
+    workload_ids = {snap["workload_id"] for snap in snaps}
+    for workload_id in workloads_ids:
+        workload_snaps = [s for s in snaps if s["workload_id"] == workload_id]
+        workload_snaps.sort(key=lambda s: trilio.get_datetime(s["created_at"]), reverse=False)
+        if len(workload_snaps) < 2:
+            # no old snaps to delete from this workload
+            continue
+        if workload_snaps[-1]["status"] != "available":
+            # Something is wrong here, don't delete things
+            continue
+        del workload_snaps[-1]
+        for workload_snap in workload_snaps:
+            snapshot_id = workload_snap["id"]
+            logging.info(f"deleting snapshot id: {snapshot_id}")
+            trilio.delete_snapshot(token, token_data, snapshot_id)
 
 
 def get_entrypoint():
-    """ Return the entrypoint click group """
+    """Return the entrypoint click group"""
 
     @click.group()
     def entrypoint():
-        """ Entrypoint for Click """
+        """Entrypoint for Click"""
 
     entrypoint.add_command(update_reports)
     entrypoint.add_command(print_reports_data)
@@ -124,6 +143,6 @@ def get_entrypoint():
 
 
 def main():
-    """ Entrypoint defined in setup.py """
+    """Entrypoint defined in setup.py"""
     entrypoint = get_entrypoint()
     entrypoint()

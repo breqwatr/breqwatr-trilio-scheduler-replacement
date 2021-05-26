@@ -51,11 +51,7 @@ def running():
         start_dt = datetime.datetime.strptime(snap_start, "%Y-%m-%dT%H:%M:%S.%f")
         now_dt = now = datetime.datetime.now()
         snap_duration = str(now_dt - start_dt)
-        data = {
-          "id": workload["id"],
-          "name": workload["name"],
-          "snap_duration": snap_duration
-        }
+        data = {"id": workload["id"], "name": workload["name"], "snap_duration": snap_duration}
         running_summary.append(data)
     return render_template("running.html", workloads=running_summary)
 

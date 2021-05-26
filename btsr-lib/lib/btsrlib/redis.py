@@ -33,7 +33,7 @@ def get_str(client, key):
 
 
 def set_last_updated(client):
-    """ Update the 'last_updated' key with a datestamp """
+    """Update the 'last_updated' key with a datestamp"""
     now = str(datetime.now())
     logging.debug(f"setting last_updated in redis to {now}")
     client.set("last_updated", now)

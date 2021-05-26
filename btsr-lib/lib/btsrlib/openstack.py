@@ -90,7 +90,7 @@ def get_servers(token, token_data):
 
 
 def get_server(token, token_data, server_id):
-    """ Get one server's details """
+    """Get one server's details"""
     nova_url = os_endpoint("nova", token_data)
     server_url = f"{nova_url}/servers/{server_id}"
     headers = os_headers(token)

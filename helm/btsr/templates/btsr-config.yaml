@@ -1,38 +1,22 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: btsr-tuning
+  name: btsr-scheduling
 data:
   concurrent_fulls_cloud: "1"
   concurrent_fulls_host: "1"
   concurrent_total_cloud: "1"
   concurrent_total_host: "1"
   nfs_speed_bytes_per_second: "375809638400"  # 350G (1024 * 1024 * 1024 * 350)
-  volume_create_time_seconds: "60"
-  workload_time_seconds: "60"
-  fudge_factor: "1"
-
----
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: btsr-backups
-data:
-  interval: "7"
-  full_interval: "7"
-  retention_days: "7"
-
----
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: btsr-times
-data:
+  time_est_volume_create_time_seconds: "60"
+  time_est_workload_time_seconds: "60"
+  time_est_fudge_factor: "1"
+  backup_interval_days: "7"
+  backup_full_interval_days: "7"
+  backup_retention_days: "7"
   allow_weekdays: "yes"
   allow_weekends: "yes"
-  allow_all_day_weekdays: "no"
+  allow_all_day_weekdays: "yes"
   allow_all_day_weekends: "yes"
   weekday_blacklist_start_time: "08:00"
   weekday_blacklist_end_time: "18:00"
@@ -48,4 +32,4 @@ metadata:
 data:
   openrcPaths.conf: |
     [DEFAULT]
-    kyle=kyle-openrc.sh
+    sample=sample-openrc.sh

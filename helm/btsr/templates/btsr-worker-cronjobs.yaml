@@ -32,6 +32,10 @@ spec:
                 name: logs-dir
             command: ["/bin/bash","-c"]
             args: ["source /btsr/openrc.sh && btsr-worker update-reports"]
+            envFrom:
+              - configMapRef:
+                  name: btsr-scheduling
+
 
 ---
 
@@ -69,6 +73,9 @@ spec:
                 name: logs-dir
             command: ["/bin/bash","-c"]
             args: ["source /btsr/openrc.sh && btsr-worker create-missing-workloads"]
+            envFrom:
+              - configMapRef:
+                  name: btsr-scheduling
 
 ---
 
@@ -106,6 +113,9 @@ spec:
                 name: logs-dir
             command: ["/bin/bash","-c"]
             args: ["source /btsr/openrc.sh && btsr-worker delete-old-snapshots"]
+            envFrom:
+              - configMapRef:
+                  name: btsr-scheduling
 
 ---
 
@@ -114,7 +124,7 @@ kind: CronJob
 metadata:
   name: btsr-worker-exec-backups
 spec:
-  # every 5 min
+  # every 15 min
   schedule: "*/15 * * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
@@ -142,3 +152,6 @@ spec:
                 name: logs-dir
             command: ["/bin/bash","-c"]
             args: ["source /btsr/openrc.sh && btsr-worker start-snapshots"]
+            envFrom:
+              - configMapRef:
+                  name: btsr-scheduling

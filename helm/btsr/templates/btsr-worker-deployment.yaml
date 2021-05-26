@@ -35,3 +35,6 @@ spec:
               name: openrc-file
             - mountPath: /var/log/btsr
               name: logs-dir
+          envFrom:
+            - configMapRef:
+                name: btsr-scheduling
