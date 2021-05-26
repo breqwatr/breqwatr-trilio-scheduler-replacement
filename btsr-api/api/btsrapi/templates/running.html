@@ -3,12 +3,12 @@
 
 <table border="1px solid black">
 <tr>
-  <th>worklad id</th>
+  <th>workload id</th>
   <th>workload name</th>
   <th>snap duration</th>
 </tr>
 
-{% foreach workload in workloads  %}
+{% for workload in workloads  %}
 <tr>
   <td>{{ workload.id }}</td>
   <td>{{ workload.name }}</td>

@@ -2,19 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: btsr-api
-  name: btsr-api
+    app: btsr-worker-idle
+  name: btsr-worker-idle
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: btsr-api
+      app: btsr-worker-idle
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: btsr-api
+        app: btsr-worker-idle
     spec:
       volumes:
         - name: openrc-file
@@ -25,11 +25,11 @@ spec:
             path: {{ required "logs_dir is required" .Values.logs_dir }}
             type: Directory
       containers:
-        - image: breqwatr/btsr-api
+        - image: breqwatr/btsr-worker
           imagePullPolicy: IfNotPresent  # or "Never" if building locally
-          name: btsr-api
-          ports:
-            - containerPort: 80
+          name: btsr-worker-idle
+          command: ["/bin/bash","-c"]
+          args: ["tail -f /dev/null"]
           volumeMounts:
             - mountPath: /btsr/openrc.sh
               name: openrc-file

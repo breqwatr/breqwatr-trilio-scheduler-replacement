@@ -3,13 +3,13 @@ kind: CronJob
 metadata:
   name: btsr-worker-update-reports
 spec:
-  # every 1 minute
-  schedule: "* * * * *"
+  # every 5 minutes
+  schedule: "*/5 * * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       parallelism: 1
-      activeDeadlineSeconds: 50
+      activeDeadlineSeconds: 600
       template:
         spec:
           restartPolicy: OnFailure
@@ -115,7 +115,7 @@ metadata:
   name: btsr-worker-exec-backups
 spec:
   # every 5 min
-  schedule: "*/5 * * * *"
+  schedule: "*/15 * * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:

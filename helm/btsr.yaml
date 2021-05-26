@@ -1,3 +1,4 @@
 openrc_file_path: /btsr/openrc/kyle-openrc.sh
 logs_dir: /var/log/btsr
 ingress_ip: 10.106.252.141
+auth_pass: ""  # REQUIRED

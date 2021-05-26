@@ -13,3 +13,4 @@ urllib3.disable_warnings()
 
 # disable urllib3 log spam
 logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger('urllib3').setLevel(logging.CRITICAL)

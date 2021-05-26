@@ -14,7 +14,8 @@ import btsrlib.redis as redis
 @click.command(name="update-reports")
 def update_reports():
     """ Save to redis a list of all the servers and their backup-related details """
-    logging.debug("Updating reports")
+    # get the list of servers for its report
+    logging.debug("Updating servers_summary report")
     config.source_openrc_file()
     env = os.get_os_env()
     token, token_data = os.get_token(env)
@@ -23,6 +24,25 @@ def update_reports():
     summary = trilio.get_trilio_summary(server_details)
     client = redis.get_client()
     redis.set_dict(client, "servers_summary", summary)
+    # find all the workloads that aren't being tracked by this
+    logging.debug("Updating orphans report")
+    workloads = trilio.get_workloads(token, token_data)
+    parsed_workloads = []
+    for workload in workloads:
+        wsnaps = trilio.get_snapshots(token, token_data, workload_id=workload["id"])
+        last_snap = wsnaps[-1]["created_at"] if wsnaps else "never"
+        wdata = trilio.get_workload(token, token_data, workload["id"])
+        total_size = round(wdata["storage_usage"]["usage"] / 1024 / 1024 / 1024)
+        wdata = {
+            "id": workload["id"],
+            "name": workload["name"],
+            "num_snaps": len(wsnaps),
+            "last_snap": last_snap,
+            "server_names": ", ".join([i["name"] for i in wdata["instances"]]),
+            "total_snap_size": total_size,
+        }
+        parsed_workloads.append(wdata)
+    redis.set_dict(client, "orphans_summary", parsed_workloads)
     redis.set_last_updated(client)
 
 
@@ -40,6 +60,15 @@ def create_missing_workloads():
     """ Find any servers with enable-backups=true and create workloads for them. """
     logging.info("creating missing workloads")
     client = redis.get_client()
+    server_summary = redis.get_dict(client, "servers_summary")
+    config.source_openrc_file()
+    env = os.get_os_env()
+    token, token_data = os.get_token(env)
+    for server_id, server in server_summary.items():
+        if server["workload_exists"].lower() != "false":
+            continue
+        logging.info(f"creating workload for server id: {server_id}")
+        trilio.create_workload(token, token_data, server_id)
     redis.set_last_updated(client)
 
 
@@ -55,8 +84,28 @@ def delete_old_snapshots():
 def start_snapshots():
     """ start snapshots if any are due to start """
     logging.info("starting snapshots")
+    # Get the list of workloads
     client = redis.get_client()
-    redis.set_last_updated(client)
+    server_summary = redis.get_dict(client, "servers_summary")
+    config.source_openrc_file()
+    env = os.get_os_env()
+    token, token_data = os.get_token(env)
+    # check if max workloads are running, exit if they are
+    if trilio.is_max_workloads_running(token, token_data):
+        return
+    # queue up the next workload
+    next_workload = trilio.get_next_workload_to_run(token, token_data)
+    if next_workload:
+        trillio.exec_full_snaposhot(token, token_data, next_workload)
+
+
+@click.command(name="delete-old-snapshots")
+def delete_old_snashots():
+    """ Delete any old snapshots if a newer full exists """
+    # Check if any workloads have more than one snapshot in 'available' state
+    # Delete the older snapshots until there's only one in each
+
+
 
 
 def get_entrypoint():
