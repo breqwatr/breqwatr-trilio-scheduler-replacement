@@ -27,11 +27,18 @@ def test_api():
     return "OK 1\n"
 
 
+def server_dt(server):
+    """ Get the dt of the server's created """
+    # ...apparently the timestamp is in Zulu time, because reasons
+    return datetime.datetime.strptime(server["created"], "%Y-%m-%dT%H:%M:%SZ")
+
 def servers():
     """Servers page"""
     client = redis.get_client()
     servers_summary = redis.get_dict(redis.get_client(), "servers_summary")
-    return render_template("servers.html", servers=servers_summary)
+    servers = [servers_summary[server_id] for server_id in servers_summary]
+    servers.sort(key=lambda s: server_dt(s), reverse=False)
+    return render_template("servers.html", servers=servers)
 
 
 def running():

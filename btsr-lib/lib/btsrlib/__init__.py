@@ -3,7 +3,12 @@ import requests
 import logging
 
 # enable logging and configure the log file path
-logging.basicConfig(filename="/var/log/btsr/btsr.log", level=logging.DEBUG)
+logging.basicConfig(
+    filename="/var/log/btsr/btsr.log",
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 # disable ssl warnings
 urllib3.disable_warnings()

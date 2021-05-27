@@ -3,6 +3,7 @@ import requests
 import datetime
 import json
 import btsrlib.openstack as os
+import btsrlib.trilio as trilio
 from btsrlib.common import env
 
 ENDPOINT = "TrilioVaultWLM"
@@ -78,7 +79,7 @@ def create_workload(token, token_data, server_id):
     data = {
         "workload": {
             "name": server["id"],
-            "description": None,
+            "description": server["name"],
             "workload_type_id": "f82ce76f-17fe-438b-aa37-7a023058e50d",
             "source_platform": None,
             "instances": [{"instance-id": server["id"]}],
@@ -133,21 +134,35 @@ def is_backup_enabled(server):
     )
 
 
-def get_trilio_summary(server_details):
+def get_trilio_summary(token, token_data, server_details):
     """Given a dict of server details, remove extrenuous data and add trilio data"""
     data = {}
+    workloads = trilio.get_workloads(token, token_data)
     for server_id in server_details:
         server = server_details[server_id]
+        workload_exists = "False"
+        last_backup = "never"
+        last_backup_duration = "-"
+        last_backup_size = "-"
+        last_backup_error = "-"
+        workload = next((w for w in workloads if w["name"] == server_id), None)
+        if workload:
+            workload_exists = "True"
+            wdata = trilio.get_workload(token, token_data, workload["id"])
+            if wdata["storage_usage"]["full"]["snap_count"] > 0:
+                last_backup = wdata["updated_at"]
+                usage = wdata["storage_usage"]["full"]["usage"]
+                last_backup_size = round(usage / 1024 / 1024 / 1024, 2)
         data[server_id] = {
             "id": server_id,
             "name": server["name"],
             "created": server["created"],
             "backups_enabled": str(is_backup_enabled(server)),
-            "workload_exists": "False",
-            "last_backup": "never",
-            "last_backup_duration": "-",
-            "last_backup_size": "-",
-            "last_backup_error": "-",
+            "workload_exists": workload_exists,
+            "last_backup": last_backup,
+            "last_backup_duration": last_backup_duration,
+            "last_backup_size": last_backup_size,
+            "last_backup_error": last_backup_error,
         }
     return data
 
@@ -155,7 +170,7 @@ def get_trilio_summary(server_details):
 def datetime_today_at(now, time):
     """Return a datetime of today at the given time"""
     return datetime.datetime.combine(
-        now, datetime.datetime.strptime(blacklist_start, "%H:%M").time()
+        now, datetime.datetime.strptime(time, "%H:%M").time()
     )
 
 
@@ -200,11 +215,11 @@ def get_next_workload_to_run(token, token_data):
     # First, find the snapshots associated with each workload
     for workload in workloads:
         workload_id = workload["id"]
-        snaps[workload_id] = trilio.get_snapshots(token, token_data, workload_id=workload_id)
+        snaps = trilio.get_snapshots(token, token_data, workload_id=workload_id)
         workload["snaps"] = snaps
     # Check if any of the workloads have no snaps, and if they fit
     for workload in [w for w in workloads if not w["snaps"]]:
-        if trilio.workload_fits(workload["id"]):
+        if trilio.workload_fits(token, token_data, workload["id"]):
             return workload
     # If not, get a list of workloads sorted least recently ran
     workloads.sort(key=lambda w: get_datetime(w["updated_at"]), reverse=False)
@@ -241,15 +256,14 @@ def is_max_workloads_running(token, token_data):
     max_cloud_workloads = int(conf()["concurrent_total_cloud"])
     workloads = get_workloads(token, token_data)
     unavail_workloads = [w for w in workloads if w["status"] != "available"]
-    return len(unavail_workloads) < max_cloud_workloads
+    return len(unavail_workloads) >= max_cloud_workloads
 
 
 def delete_snapshot(token, token_data, snapshot_id):
     """delete a given snapshot"""
     wlm_url = os.os_endpoint(ENDPOINT, token_data)
-    workload_url = f"{wlm_url}/snapshot/{snapshot_id}"
+    snapshots_url = f"{wlm_url}/snapshots/{snapshot_id}"
     headers = os.os_headers(token)
-    resp = requests.get(workload_url, headers=headers, verify=False)
+    resp = requests.delete(snapshots_url, headers=headers, verify=False)
     if resp.status_code != 200:
         raise os.OpenstackException(f"{resp.status_code}: {resp.reason}")
-    return resp.json()["workload"]

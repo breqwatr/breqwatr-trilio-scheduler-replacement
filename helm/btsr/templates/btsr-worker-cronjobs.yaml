@@ -3,8 +3,8 @@ kind: CronJob
 metadata:
   name: btsr-worker-update-reports
 spec:
-  # every 5 minutes
-  schedule: "*/5 * * * *"
+  # every 20 minutes - use the idle pod to run on demand
+  schedule: "*/20 * * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:

@@ -20,7 +20,7 @@ def update_reports():
     token, token_data = os.get_token(env)
     servers = os.get_servers(token, token_data)
     server_details = os.get_servers_details(token, token_data, servers)
-    summary = trilio.get_trilio_summary(server_details)
+    summary = trilio.get_trilio_summary(token, token_data, server_details)
     client = redis.get_client()
     redis.set_dict(client, "servers_summary", summary)
     # find all the workloads that aren't being tracked by this
@@ -63,21 +63,18 @@ def create_missing_workloads():
     config.source_openrc_file()
     env = os.get_os_env()
     token, token_data = os.get_token(env)
+    workloads = trilio.get_workloads(token, token_data)
     for server_id, server in server_summary.items():
         if server["workload_exists"].lower() != "false":
             continue
         if server["backups_enabled"].lower() == "false":
             continue
+        this_workload = next((w for w in workloads if w["name"] == server_id), False)
+        if this_workload:
+            # This workload already exists
+            continue
         logging.info(f"creating workload for server id: {server_id}")
         trilio.create_workload(token, token_data, server_id)
-    redis.set_last_updated(client)
-
-
-@click.command(name="delete-old-snapshots")
-def delete_old_snapshots():
-    """Find any workloads with 2 'available' snapshots and delete the older one"""
-    logging.info("deleting old snapshots")
-    client = redis.get_client()
     redis.set_last_updated(client)
 
 
@@ -85,23 +82,23 @@ def delete_old_snapshots():
 def start_snapshots():
     """start snapshots if any are due to start"""
     logging.info("starting snapshots")
-    # Get the list of workloads
-    client = redis.get_client()
-    server_summary = redis.get_dict(client, "servers_summary")
     config.source_openrc_file()
     env = os.get_os_env()
     token, token_data = os.get_token(env)
     # check if max workloads are running, exit if they are
     if trilio.is_max_workloads_running(token, token_data):
+        logging.debug("not running any snaps, is_max_workloads_running == True")
         return
     # queue up the next workload
     next_workload = trilio.get_next_workload_to_run(token, token_data)
     if next_workload:
-        trillio.exec_full_snaposhot(token, token_data, next_workload)
+        workload_id = next_workload["id"]
+        logging.debug(f"Running snapshot on workload id: {workload_id}")
+        trilio.exec_full_snapshot(token, token_data, workload_id)
 
 
 @click.command(name="delete-old-snapshots")
-def delete_old_snashots():
+def delete_old_snapshots():
     """Delete any old snapshots if a newer full exists"""
     logging.info("creating missing workloads")
     client = redis.get_client()
@@ -111,7 +108,7 @@ def delete_old_snashots():
     token, token_data = os.get_token(env)
     snaps = trilio.get_snapshots(token, token_data)
     workload_ids = {snap["workload_id"] for snap in snaps}
-    for workload_id in workloads_ids:
+    for workload_id in workload_ids:
         workload_snaps = [s for s in snaps if s["workload_id"] == workload_id]
         workload_snaps.sort(key=lambda s: trilio.get_datetime(s["created_at"]), reverse=False)
         if len(workload_snaps) < 2:

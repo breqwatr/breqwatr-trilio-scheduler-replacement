@@ -2,7 +2,10 @@
 <h1>Backup Report: Servers</h1>
 
 <style>
-  td { padding-left: 5px; }
+  td {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
 </style>
 
 <table border="1px solid black">
@@ -14,12 +17,11 @@
   <th>Workload Exists</th>
   <th>Last Backup</th>
   <th>Duration</th>
-  <th>Size</th>
+  <th>Size (GB)</th>
   <th>Error</th>
 </tr>
 
-{% for server_id in servers -%}
-{% set server = servers[server_id] %}
+{% for server in servers -%}
 <tr>
   <td> {{ server.id }} </td>
   <td> {{ server.name}} </td>
