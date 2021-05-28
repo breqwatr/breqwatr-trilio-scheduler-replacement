@@ -30,9 +30,13 @@
   <td> {{ server.created }} </td>
   <td> {% if server.backups_enabled == "True" %}True{% else %}&nbsp;{% endif %} </td>
   <td> {% if server.workload_exists == "True" %}True{% else %}&nbsp;{% endif %} </td>
-  <td> {{ server.last_backup }} </td>
+  <td>
+    {% if server.last_backup != "never" %}{{ server.last_backup }}{% else %}&nbsp;{% endif %}
+    </td>
   <td> {{ server.last_backup_duration }} </td>
-  <td> {{ server.last_backup_size }} </td>
+  <td>
+    {% if server.last_backup_size != "-" %}{{ server.last_backup_size }}{% else %}&nbsp;{% endif %}
+  </td>
   <td> {{ server.last_backup_error }} </td>
 </tr>
 {%- endfor %}
