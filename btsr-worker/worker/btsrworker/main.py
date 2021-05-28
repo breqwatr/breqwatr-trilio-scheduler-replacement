@@ -28,6 +28,9 @@ def update_reports():
     workloads = trilio.get_workloads(token, token_data)
     parsed_workloads = []
     for workload in workloads:
+        if workload["name"] in summary:
+            if summary[workload["name"]]["backups_enabled"].lower() == "true":
+                continue
         wsnaps = trilio.get_snapshots(token, token_data, workload_id=workload["id"])
         last_snap = wsnaps[-1]["created_at"] if wsnaps else "never"
         wdata = trilio.get_workload(token, token_data, workload["id"])

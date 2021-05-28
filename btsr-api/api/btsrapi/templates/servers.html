@@ -5,6 +5,8 @@
   td {
     padding-left: 5px;
     padding-right: 5px;
+    border-right: 0;
+    border-bottom: 0;
   }
 </style>
 
@@ -26,8 +28,8 @@
   <td> {{ server.id }} </td>
   <td> {{ server.name}} </td>
   <td> {{ server.created }} </td>
-  <td> {{ server.backups_enabled }} </td>
-  <td> {{ server.workload_exists }} </td>
+  <td> {% if server.backups_enabled == "True" %}True{% else %}&nbsp;{% endif %} </td>
+  <td> {% if server.workload_exists == "True" %}True{% else %}&nbsp;{% endif %} </td>
   <td> {{ server.last_backup }} </td>
   <td> {{ server.last_backup_duration }} </td>
   <td> {{ server.last_backup_size }} </td>

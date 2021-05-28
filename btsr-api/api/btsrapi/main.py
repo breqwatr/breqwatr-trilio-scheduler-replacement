@@ -28,9 +28,10 @@ def test_api():
 
 
 def server_dt(server):
-    """ Get the dt of the server's created """
+    """Get the dt of the server's created"""
     # ...apparently the timestamp is in Zulu time, because reasons
     return datetime.datetime.strptime(server["created"], "%Y-%m-%dT%H:%M:%SZ")
+
 
 def servers():
     """Servers page"""
@@ -50,15 +51,24 @@ def running():
     workloads = trilio.get_workloads(token, token_data)
     running_summary = []
     locked = [w for w in workloads if w["status"] != "available"]
+    summary = redis.get_dict(redis.get_client(), "servers_summary")
     for workload in locked:
         sdata = trilio.get_snapshots(token, token_data, workload_id=workload["id"])
         if not sdata:
             continue
+        server_name = "-"
+        if summary and workload["name"] in summary:
+            server_name = summary[workload["name"]]["name"]
         snap_start = sdata[-1]["created_at"]
         start_dt = datetime.datetime.strptime(snap_start, "%Y-%m-%dT%H:%M:%S.%f")
         now_dt = now = datetime.datetime.now()
         snap_duration = str(now_dt - start_dt)
-        data = {"id": workload["id"], "name": workload["name"], "snap_duration": snap_duration}
+        data = {
+            "id": workload["id"],
+            "name": workload["name"],
+            "server_name": server_name,
+            "snap_duration": snap_duration,
+        }
         running_summary.append(data)
     return render_template("running.html", workloads=running_summary)
 
