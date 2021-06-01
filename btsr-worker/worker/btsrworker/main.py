@@ -14,7 +14,7 @@ import btsrlib.redis as redis
 def update_reports():
     """Save to redis a list of all the servers and their backup-related details"""
     # get the list of servers for its report
-    logging.debug("Updating servers_summary report")
+    logging.info("Updating servers_summary report")
     config.source_openrc_file()
     env = os.get_os_env()
     token, token_data = os.get_token(env)
@@ -28,6 +28,7 @@ def update_reports():
     workloads = trilio.get_workloads(token, token_data)
     parsed_workloads = []
     for workload in workloads:
+        # logging.debug(f"  update-reports: parsing workload: {workload['id']}")
         if workload["name"] in summary:
             if summary[workload["name"]]["backups_enabled"].lower() == "true":
                 continue

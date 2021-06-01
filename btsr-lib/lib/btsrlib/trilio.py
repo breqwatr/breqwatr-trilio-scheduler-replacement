@@ -156,6 +156,7 @@ def get_trilio_summary(token, token_data, server_details):
         data[server_id] = {
             "id": server_id,
             "name": server["name"],
+            "host": server['OS-EXT-SRV-ATTR:hypervisor_hostname']
             "created": server["created"],
             "backups_enabled": str(is_backup_enabled(server)),
             "workload_exists": workload_exists,

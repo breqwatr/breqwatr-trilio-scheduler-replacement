@@ -15,10 +15,15 @@ app = Flask(__name__)
 
 def index():
     """index page"""
+    last_updated = redis.get_str(redis.get_client(), "last_updated")
+    if last_updated:
+        last_updated = last_updated.decode()
     return (
         "<a href='/report/servers'>server report</a><br />\n"
         "<a href='/report/running'>running backups report</a><br />\n"
-        "<a href='/report/orphans'>orphaned workloads report</a><br />\n"
+        "<a href='/report/orphans'>orphaned workloads report</a><br /><br />\n"
+        "<br />"
+        f"<hr/><b>Last Updated</b>: {last_updated}"
     )
 
 
@@ -35,7 +40,6 @@ def server_dt(server):
 
 def servers():
     """Servers page"""
-    client = redis.get_client()
     servers_summary = redis.get_dict(redis.get_client(), "servers_summary")
     servers = [servers_summary[server_id] for server_id in servers_summary]
     servers.sort(key=lambda s: server_dt(s), reverse=False)
@@ -44,7 +48,7 @@ def servers():
 
 def running():
     """Running page"""
-    logging.debug("Updating servers_summary report")
+    logging.info("Polling data for /running report")
     config.source_openrc_file()
     env = os.get_os_env()
     token, token_data = os.get_token(env)
@@ -57,8 +61,10 @@ def running():
         if not sdata:
             continue
         server_name = "-"
+        host_name = ""
         if summary and workload["name"] in summary:
             server_name = summary[workload["name"]]["name"]
+            server = summary[workload["name"]]["host"]
         snap_start = sdata[-1]["created_at"]
         start_dt = datetime.datetime.strptime(snap_start, "%Y-%m-%dT%H:%M:%S.%f")
         now_dt = now = datetime.datetime.now()
@@ -67,6 +73,7 @@ def running():
             "id": workload["id"],
             "name": workload["name"],
             "server_name": server_name,
+            "host_name": host_name,
             "snap_duration": snap_duration,
         }
         running_summary.append(data)
