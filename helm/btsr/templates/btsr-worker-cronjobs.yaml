@@ -124,8 +124,8 @@ kind: CronJob
 metadata:
   name: btsr-worker-exec-backups
 spec:
-  # every 15 min
-  schedule: "*/15 * * * *"
+  # every 10 min
+  schedule: "*/10 * * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:

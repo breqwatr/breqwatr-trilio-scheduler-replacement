@@ -3,10 +3,10 @@ kind: ConfigMap
 metadata:
   name: btsr-scheduling
 data:
-  concurrent_fulls_cloud: "2"
-  concurrent_fulls_host: "2"
-  concurrent_total_cloud: "2"
-  concurrent_total_host: "2"
+  concurrent_fulls_cloud: "3"
+  concurrent_fulls_host: "1"
+  concurrent_total_cloud: "3"
+  concurrent_total_host: "1"
   nfs_speed_bytes_per_second: "375809638400"  # 350G (1024 * 1024 * 1024 * 350)
   time_est_volume_create_time_seconds: "60"
   time_est_workload_time_seconds: "60"
