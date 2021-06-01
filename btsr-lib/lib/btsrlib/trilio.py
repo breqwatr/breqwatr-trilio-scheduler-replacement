@@ -145,22 +145,28 @@ def get_trilio_summary(token, token_data, server_details):
         last_backup_duration = "-"
         last_backup_size = "-"
         last_backup_error = "-"
+        time_since_last = "-"
         workload = next((w for w in workloads if w["name"] == server_id), None)
         if workload:
             workload_exists = "True"
             wdata = trilio.get_workload(token, token_data, workload["id"])
             if wdata["storage_usage"]["full"]["snap_count"] > 0:
                 last_backup = wdata["updated_at"]
+                lb_dt = get_datetime(summary[server_id]['last_backup'])
+                now = datetime.datetime.now()
+                time_since_last = str(now - lb_dt)
                 usage = wdata["storage_usage"]["full"]["usage"]
                 last_backup_size = round(usage / 1024 / 1024 / 1024, 2)
         data[server_id] = {
             "id": server_id,
             "name": server["name"],
             "host": server['OS-EXT-SRV-ATTR:hypervisor_hostname']
+            "status": server["status"],
             "created": server["created"],
             "backups_enabled": str(is_backup_enabled(server)),
             "workload_exists": workload_exists,
             "last_backup": last_backup,
+            "time_since_last_backup": time_since_last,
             "last_backup_duration": last_backup_duration,
             "last_backup_size": last_backup_size,
             "last_backup_error": last_backup_error,
