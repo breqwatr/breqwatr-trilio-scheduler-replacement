@@ -19,7 +19,7 @@
   <th>Backups Enabled</th>
   <th>Workload Exists</th>
   <th>Backup Date</th>
-  <th>...Ago</th>
+  <th>Backup Age</th>
   <th>Duration</th>
   <th>Size (GB)</th>
   <th>Error</th>
@@ -31,12 +31,14 @@
   <td> {{ server.name}} </td>
   <td> {{ server.created }} </td>
   <td> {{ server.status }} </td>
-  <td> {{ server.time_since_last_backup }} </td>
   <td> {% if server.backups_enabled == "True" %}True{% else %}&nbsp;{% endif %} </td>
   <td> {% if server.workload_exists == "True" %}True{% else %}&nbsp;{% endif %} </td>
   <td>
     {% if server.last_backup != "never" %}{{ server.last_backup }}{% else %}&nbsp;{% endif %}
-    </td>
+  </td>
+  <td>
+    {% if server.time_since_last_backup != "-" %}{{ server.time_since_last_backup }}{% else %}&nbsp;{% endif%}
+  </td>
   <td> {{ server.last_backup_duration }} </td>
   <td>
     {% if server.last_backup_size != "-" %}{{ server.last_backup_size }}{% else %}&nbsp;{% endif %}

@@ -55,18 +55,37 @@ export OS_AUTH_PLUGIN=password
 ```
 
 
-Create a helm config file to identify your openrc files:
+### Create a password for the reports
 
-`vi btsr-helm.yaml`
+Generate the password and convert it to base64. Delete the file it created.
 
-```yaml
-# btsr-helm.yaml
-... somehow specify the openrc file(e) to use
+```
+htpasswd -c auth breqwatr
+base64 auth
+rm auth
+```
+
+
+### Write the helm config file
+
+Create a helm config file to identify your openRC file, logs dir, and so on.
+Use the base64 string from above as the value of `auth_pass`.
+
+Note: The `ingress_ip` value currently is being ignored (bug)... It's choosing its own.
+
+`vi /home/ubuntu/btsr-helm.yaml`
+
+```
+openrc_file_path: /btsr/openrc/openrc.sh
+logs_dir: /var/log/btsr
+ingress_ip: 10.11.12.13
+auth_pass: "YnJlcXdhdHI6JGFwcjEkLjNMOGZyak8keVRZUi9YQ2I4RndQMXNSYTJkU0pnMAo="
 ```
 
 ### Deploy the app using Helm
-cd ../helm
-helm install -f btsr.yaml btsr ./btsr
+
+cd helm
+helm install -f /home/ubuntu/btsr-helm.yaml btsr ./btsr
 
 # Show it
 helm list

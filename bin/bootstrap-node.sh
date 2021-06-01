@@ -84,6 +84,13 @@ fi
 echo
 
 
+#########
+# Utils #
+#########
+if [[ ! $(dpkg -l | grep apache2-utils) ]]; then
+  apt-get install -y apache2-utils
+fi
+
 ############
 # env conf #
 ############

@@ -152,7 +152,7 @@ def get_trilio_summary(token, token_data, server_details):
             wdata = trilio.get_workload(token, token_data, workload["id"])
             if wdata["storage_usage"]["full"]["snap_count"] > 0:
                 last_backup = wdata["updated_at"]
-                lb_dt = get_datetime(summary[server_id]['last_backup'])
+                lb_dt = get_datetime(last_backup)
                 now = datetime.datetime.now()
                 time_since_last = str(now - lb_dt)
                 usage = wdata["storage_usage"]["full"]["usage"]
@@ -160,7 +160,7 @@ def get_trilio_summary(token, token_data, server_details):
         data[server_id] = {
             "id": server_id,
             "name": server["name"],
-            "host": server['OS-EXT-SRV-ATTR:hypervisor_hostname']
+            "host": server['OS-EXT-SRV-ATTR:hypervisor_hostname'],
             "status": server["status"],
             "created": server["created"],
             "backups_enabled": str(is_backup_enabled(server)),
@@ -215,9 +215,34 @@ def workload_fits(token, token_data, workload_id):
     return True
 
 
+def get_qty_snaps_running_per_host(token, token_data, workloads):
+    """ return a dict by hostname listing the qty of snaps now running on it """
+    running = {}
+    server_ids = [ w["name"] for w in workloads if w["status"] != "available" ]
+    for server_id in server_ids:
+        server = os.get_server(token, token_data, server_id)
+        host = server["OS-EXT-SRV-ATTR:hypervisor_hostname"]
+        if host in running:
+            running[host] += 1
+        else:
+            running[host] = 1
+    return running
+
+
+def is_max_running_on_host(token, token_data, server_id, running_per_host):
+    """ return bool - does this host have too many running? """
+    host_max = env("concurrent_fulls_host")
+    server = os.get_server(token, token_data, server_id)
+    host = server["OS-EXT-SRV-ATTR:hypervisor_hostname"]
+    if host not in running_per_host:
+        return False
+    return host_max >= running_per_host[host]
+
+
 def get_next_workload_to_run(token, token_data):
     """Find the next workload to run"""
     workloads = get_workloads(token, token_data)
+    running_per_host = get_qty_snaps_running_per_host(token, token_data, workloads)
     # Have any workloads not had any snapshots yet? If so, choose it.
     # First, find the snapshots associated with each workload
     for workload in workloads:
@@ -226,14 +251,19 @@ def get_next_workload_to_run(token, token_data):
         workload["snaps"] = snaps
     # Check if any of the workloads have no snaps, and if they fit
     for workload in [w for w in workloads if not w["snaps"]]:
+        if is_max_running_on_host(token, token_data, workload["name"], running_per_host):
+            continue
         if trilio.workload_fits(token, token_data, workload["id"]):
             return workload
     # If not, get a list of workloads sorted least recently ran
     workloads.sort(key=lambda w: get_datetime(w["updated_at"]), reverse=False)
     now = datetime.datetime.now()
     for workload in workloads:
+        # Check if the host this VM is on already has too many workloads running
+        if is_max_running_on_host(token, token_data, workload["name"], running_per_host):
+            continue
+        # Check if the snapshots are old enough to re-do
         snaps = get_snapshots(token, token_data, workload["id"])
-        # if no snaps have ran, this one's good to go
         if not snaps:
             return workload
         # Check if the last snapshot over a week old
