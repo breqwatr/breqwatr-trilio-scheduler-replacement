@@ -20,6 +20,7 @@ def index():
         last_updated = last_updated.decode()
     return (
         "<a href='/report/servers'>server report</a><br />\n"
+        "<a href='/report/servers.csv'>server report (CSV)</a><br />\n"
         "<a href='/report/running'>running backups report</a><br />\n"
         "<a href='/report/orphans'>orphaned workloads report</a><br /><br />\n"
         "<br />"
@@ -44,6 +45,30 @@ def servers():
     servers = [servers_summary[server_id] for server_id in servers_summary]
     servers.sort(key=lambda s: server_dt(s), reverse=False)
     return render_template("servers.html", servers=servers)
+
+
+def servers_csv():
+    """ Servers page in CSV format """
+    servers_summary = redis.get_dict(redis.get_client(), "servers_summary")
+    servers = [servers_summary[server_id] for server_id in servers_summary]
+    servers.sort(key=lambda s: server_dt(s), reverse=False)
+    csv_text="ID,Name,Created,Status,Backups Enabled,Workload Exists,Backup Date,Backup Age,Size\r\n"
+    for server in servers:
+        vals = [
+            server["id"],
+            server["name"],
+            server["created"],
+            server["status"],
+            server["backups_enabled"],
+            server["workload_exists"],
+            server["last_backup"],
+            server["time_since_last_backup"],
+            str(server["last_backup_size"]),
+            "\r\n"
+        ]
+        csv_line = ",".join(vals)
+        csv_text += csv_line
+    return csv_text
 
 
 def running():
@@ -90,5 +115,6 @@ def orphans():
 app.add_url_rule("/", "index", index, methods=["GET"])
 app.add_url_rule("/test", "test_api", test_api, methods=["GET"])
 app.add_url_rule("/servers", "report", servers, methods=["GET"])
+app.add_url_rule("/servers.csv", "csvreport", servers_csv, methods=["GET"])
 app.add_url_rule("/running", "running", running, methods=["GET"])
 app.add_url_rule("/orphans", "orphans", orphans, methods=["GET"])
