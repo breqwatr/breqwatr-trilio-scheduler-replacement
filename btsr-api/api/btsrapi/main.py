@@ -20,7 +20,7 @@ def index():
         last_updated = last_updated.decode()
     return (
         "<a href='/report/servers'>server report</a><br />\n"
-        "<a href='/report/servers.csv'>server report (CSV)</a><br />\n"
+        "<a href='/report/servers.csv' download='servers.csv'>server report (CSV)</a><br />\n"
         "<a href='/report/running'>running backups report</a><br />\n"
         "<a href='/report/orphans'>orphaned workloads report</a><br /><br />\n"
         "<br />"
@@ -53,6 +53,7 @@ def servers_csv():
     servers = [servers_summary[server_id] for server_id in servers_summary]
     servers.sort(key=lambda s: server_dt(s), reverse=False)
     csv_text="ID,Name,Created,Status,Backups Enabled,Workload Exists,Backup Date,Backup Age,Size\r\n"
+    # time_since_last_backup has commas that need to be escaped
     for server in servers:
         vals = [
             server["id"],
@@ -62,7 +63,7 @@ def servers_csv():
             server["backups_enabled"],
             server["workload_exists"],
             server["last_backup"],
-            server["time_since_last_backup"],
+            f"\"{server['time_since_last_backup']}\"",
             str(server["last_backup_size"]),
             "\r\n"
         ]
