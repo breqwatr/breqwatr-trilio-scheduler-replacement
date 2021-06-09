@@ -64,7 +64,7 @@ def running():
         host_name = ""
         if summary and workload["name"] in summary:
             server_name = summary[workload["name"]]["name"]
-            server = summary[workload["name"]]["host"]
+            host_name = summary[workload["name"]]["host"]
         snap_start = sdata[-1]["created_at"]
         start_dt = datetime.datetime.strptime(snap_start, "%Y-%m-%dT%H:%M:%S.%f")
         now_dt = now = datetime.datetime.now()

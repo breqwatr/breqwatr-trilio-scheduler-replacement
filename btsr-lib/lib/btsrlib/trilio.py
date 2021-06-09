@@ -231,7 +231,7 @@ def get_qty_snaps_running_per_host(token, token_data, workloads):
 
 def is_max_running_on_host(token, token_data, server_id, running_per_host):
     """ return bool - does this host have too many running? """
-    host_max = env("concurrent_fulls_host")
+    host_max = int(env("concurrent_fulls_host"))
     server = os.get_server(token, token_data, server_id)
     host = server["OS-EXT-SRV-ATTR:hypervisor_hostname"]
     if host not in running_per_host:
