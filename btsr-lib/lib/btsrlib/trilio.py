@@ -1,4 +1,5 @@
 """ Trilio functions """
+import logging
 import requests
 import datetime
 import json
@@ -232,7 +233,12 @@ def get_qty_snaps_running_per_host(token, token_data, workloads):
 def is_max_running_on_host(token, token_data, server_id, running_per_host):
     """ return bool - does this host have too many running? """
     host_max = int(env("concurrent_fulls_host"))
-    server = os.get_server(token, token_data, server_id)
+    try:
+        server = os.get_server(token, token_data, server_id)
+    except os.OpenstackException:
+        # This server doesn't exist, skip it by returning True
+        logging.error(f"is_max_running_on_host: failed to find server {server_id}")
+        return True
     host = server["OS-EXT-SRV-ATTR:hypervisor_hostname"]
     if host not in running_per_host:
         return False
