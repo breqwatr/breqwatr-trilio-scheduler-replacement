@@ -1,4 +1,4 @@
-# Trilio scehduler replacement
+# Trilio scheduler replacement
 
 ## Setup K8S
 This is intended to run as a single-node k8s cluster on an ubuntu 20.04 VM.
