@@ -55,7 +55,9 @@ def get_workloads(token, token_data):
     headers = os.os_headers(token)
     resp = requests.get(workloads_url, headers=headers, verify=False)
     if resp.status_code != 200:
-        raise os.OpenstackException(f"{resp.status_code}: {resp.reason}")
+        err = f"{resp.status_code}: {resp.reason}"
+        logging.error(f"Failed trillio.get_workloads - {err}")
+        raise os.OpenstackException(err)
     return resp.json()["workloads"]
 
 
@@ -66,6 +68,8 @@ def get_workload(token, token_data, workload_id):
     headers = os.os_headers(token)
     resp = requests.get(workload_url, headers=headers, verify=False)
     if resp.status_code != 200:
+        err = f"{resp.status_code}: {resp.reason}"
+        logging.error(f"Failed trillio.get_workload - {err}")
         raise os.OpenstackException(f"{resp.status_code}: {resp.reason}")
     return resp.json()["workload"]
 
@@ -92,7 +96,9 @@ def create_workload(token, token_data, server_id):
     resp = requests.post(workload_url, headers=headers, verify=False, data=data_json)
     if resp.status_code != 202 and resp.status_code != 201:
         # it should return 201 created but returns 202 accepted for some reason
-        raise os.OpenstackException(f"{resp.status_code}: {resp.reason}")
+        err = f"{resp.status_code}: {resp.reason}"
+        logging.error(f"Failed trilio.create_workload - {err}")
+        raise os.OpenstackException(err)
     return resp.json()["workload"]
 
 
@@ -237,7 +243,7 @@ def is_max_running_on_host(token, token_data, server_id, running_per_host):
         server = os.get_server(token, token_data, server_id)
     except os.OpenstackException:
         # This server doesn't exist, skip it by returning True
-        logging.error(f"is_max_running_on_host: failed to find server {server_id}")
+        logging.warning(f"is_max_running_on_host: failed to find server {server_id}")
         return True
     host = server["OS-EXT-SRV-ATTR:hypervisor_hostname"]
     if host not in running_per_host:
@@ -245,28 +251,45 @@ def is_max_running_on_host(token, token_data, server_id, running_per_host):
     return host_max >= running_per_host[host]
 
 
+def is_workload_server_backups_enabled(token, token_data, server_id):
+    """ Check if the backups for a workload's server are actually enabled """
+    try:
+        server = os.get_server(token, token_data, server_id)
+        return is_backup_enabled(server)
+    except:
+        return False
+
 def get_next_workload_to_run(token, token_data):
     """Find the next workload to run"""
     workloads = get_workloads(token, token_data)
     running_per_host = get_qty_snaps_running_per_host(token, token_data, workloads)
     # Have any workloads not had any snapshots yet? If so, choose it.
     # First, find the snapshots associated with each workload
+    logging.debug("Checking each workload for snapshots...")
     for workload in workloads:
         workload_id = workload["id"]
         snaps = trilio.get_snapshots(token, token_data, workload_id=workload_id)
         workload["snaps"] = snaps
+    logging.debug("Checking if any workloads that have no snaps fit (are next)...")
     # Check if any of the workloads have no snaps, and if they fit
     for workload in [w for w in workloads if not w["snaps"]]:
+        if not is_workload_server_backups_enabled(token, token_data, workload["name"]):
+            continue
         if is_max_running_on_host(token, token_data, workload["name"], running_per_host):
             continue
         if trilio.workload_fits(token, token_data, workload["id"]):
             return workload
+    logging.debug("All workloads have snaps, finding an old one...")
     # If not, get a list of workloads sorted least recently ran
     workloads.sort(key=lambda w: get_datetime(w["updated_at"]), reverse=False)
     now = datetime.datetime.now()
     for workload in workloads:
         # Check if the host this VM is on already has too many workloads running
+        if not is_workload_server_backups_enabled(token, token_data, workload["name"]):
+            logging.debug(f"Skipping wID {workload['id']} - server backups disabled")
+            continue
         if is_max_running_on_host(token, token_data, workload["name"], running_per_host):
+            logging.debug(f"Skipping wID {workload['id']} - max running backups/host")
             continue
         # Check if the snapshots are old enough to re-do
         snaps = get_snapshots(token, token_data, workload["id"])
@@ -275,7 +298,11 @@ def get_next_workload_to_run(token, token_data):
         # Check if the last snapshot over a week old
         snap_date = get_datetime(snaps[-1]["created_at"])
         last_week = now - datetime.timedelta(days=7)
-        if snap_date < last_week:
+        if snap_date >= last_week:
+            logging.debug(f"Skipping wID {workload['id']} - too recent ({snap_date})")
+        else:
+            wid = workload["id"]
+            logging.debug(f"selecting wID {wid} for backup ")
             return workload
     return  # handle receiving None gracefully
 
@@ -290,6 +317,8 @@ def exec_full_snapshot(token, token_data, workload_id):
     resp = requests.post(workload_url, headers=headers, verify=False, data=data_json)
     if resp.status_code != 200 and resp.status_code != 201:
         # it should return 201 created but returns 200 ok for some reason
+        err = f"{resp.status_code}: {resp.reason}"
+        logging.error(f"trilio.exec_full_snapshot failed - {err}")
         raise os.OpenstackException(f"{resp.status_code}: {resp.reason}")
     return resp.json()["snapshot"]
 
